@@ -1,0 +1,6 @@
+{
+  "name": "KaspStore P2P Tracker",
+  "description": "BitTorrent WebTorrent Tracker for KaspStore",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
