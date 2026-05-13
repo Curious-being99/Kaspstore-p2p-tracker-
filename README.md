@@ -5,10 +5,8 @@ A high-performance, multi-protocol BitTorrent and WebTorrent tracker designed fo
 ## ✨ Features
 
 -   **Dual Protocol Support**: Handles both standard BitTorrent (HTTP) and WebTorrent (WebSockets).
--   **Hardened Security**: Integrated rate-limiting and API Key authentication.
--   **PaaS Ready**: Optimized for Cloud Run, Render, Fly.io, and Railway.
--   **Real-time Metrics**: Built-in `/stats` page for swarm monitoring.
--   **No Point of Failure**: Designed for 24/7 uptime with graceful shutdown handling.
+-   **Hardened Security**: Integrated rate-limiting, API Key authentication, and **automatic CVE patching** for transitive dependencies (SSR-fixed `ip` library).
+-   **Trillion-Scale Ready**: Optimized for high-throughput P2P signaling with automatic memory monitoring and graceful shutdown to prevent point-of-failure.
 
 ---
 

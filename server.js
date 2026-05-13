@@ -23,8 +23,16 @@ const limiter = rateLimit({
   message: { error: "Too many requests from this IP, please try again later." }
 });
 
-// Protect only the announce and scrape endpoints
-app.use(['/announce', '/scrape'], limiter);
+// Protect announce, scrape, and stats endpoints
+app.use(['/announce', '/scrape', '/stats'], (req, res, next) => {
+  const reqKey = process.env.TRACKER_API_KEY;
+  if (!reqKey) return next();
+
+  const clientKey = req.query.api_key || req.query.token;
+  if (clientKey === reqKey) return next();
+
+  res.status(401).json({ error: "Unauthorized KaspStore Access." });
+});
 
 // C. Health Check and Status Routes
 app.get(['/', '/health'], (req, res) => {
