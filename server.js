@@ -3,10 +3,41 @@ import http from 'http';
 import express from 'express';
 import { rateLimit } from 'express-rate-limit';
 import process from 'process';
+import ipaddr from 'ipaddr.js';
 
 // AI Studio binds external traffic ONLY to port 3000
 const PORT = 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
+
+/**
+ * 🔒 VIRTUAL PATCH for CVE-2024-29415 (SSRF in 'ip' package)
+ * Replaces the vulnerable ip.isPublic() logic with robust ipaddr.js validation.
+ * Blocks obfuscated private IPs like '127.1', '012.1.2.3', etc.
+ */
+function isTrulyPublic(ipString) {
+  try {
+    if (!ipString) return false;
+    
+    // Normalize and parse
+    const addr = ipaddr.process(ipString);
+    const range = addr.range();
+    
+    // Block anything identified as loopback, private, link-local, etc.
+    const privateRanges = ['loopback', 'private', 'linkLocal', 'multicast', 'unspecified', 'broadcast', 'reserved'];
+    if (privateRanges.includes(range)) return false;
+    
+    // Additional hardening against decimal/octal obfuscation (e.g., 127.1)
+    // ipaddr.process handles many of these, but we double-check normalized string
+    const normalized = addr.toString();
+    if (normalized.startsWith('127.') || normalized.startsWith('10.') || normalized.startsWith('192.168.')) {
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    return false; // If it's not a valid IP, it's not public
+  }
+}
 
 // 1. Initialize Express for the Web/API layer
 const app = express();
@@ -71,10 +102,18 @@ const tracker = new Server({
     const clientKey = params.api_key || params.token;
 
     if (clientKey === requiredKey) {
-      // 3. InfoHash Validation: Prevent "Junk Hash" spam (optional but good for scale)
+      // 3. InfoHash Validation
       if (!infoHash || infoHash.length !== 40) {
         return cb(new Error('Invalid InfoHash format.'));
       }
+
+      // 4. IP Validation (CVE-2024-29415 Mitigation)
+      // Ensure the peer IP is not a private/internal address
+      if (params.ip && !isTrulyPublic(params.ip)) {
+        console.warn(`[SECURITY_BLOCKED] Internal IP detected: ${params.ip}`);
+        return cb(new Error('KaspStore Security: Peer MUST use a globally routable public IP.'));
+      }
+
       cb(null); 
     } else {
       // Debug log for unauthorized attempts (Red Team Monitoring)

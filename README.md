@@ -5,7 +5,7 @@ A high-performance, multi-protocol BitTorrent and WebTorrent tracker designed fo
 ## ✨ Features
 
 -   **Dual Protocol Support**: Handles both standard BitTorrent (HTTP) and WebTorrent (WebSockets).
--   **Hardened Security**: Integrated rate-limiting, API Key authentication, and **automatic CVE patching** for transitive dependencies (SSR-fixed `ip` library).
+-   **Hardened Security**: Integrated rate-limiting, API Key authentication, and a **Virtual Patch for CVE-2024-29415**. We use `ipaddr.js` to block sophisticated SSRF attacks (like obfuscated decimal/octal IPs) that standard `ip` packages fail to catch.
 -   **Trillion-Scale Ready**: Optimized for high-throughput P2P signaling with automatic memory monitoring and graceful shutdown to prevent point-of-failure.
 
 ---
