@@ -23,11 +23,6 @@ cd kaspstore-tracker
 npm install
 ```
 
-### 3. Generate an API Key
-Run this command in your terminal to generate a secure secret key:
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
 
 ### 4. Configure Environment Variables
 Create a `.env` file or set these in your deployment dashboard:
@@ -37,18 +32,6 @@ TRACKER_API_KEY=your_generated_key_here
 NODE_ENV=production
 ```
 
----
-
-## 🚀 Deployment
-
-### Important: Node.js Runtime Required
-This is a **Server-Side Application**. It **cannot** be hosted on GitHub Pages, 4Everland Static, or Vercel Frontend. You must use a platform that supports Node.js processes.
-
-**Recommended Platforms:**
--   **Render.com** (Web Service)
--   **Railway.app**
--   **Fly.io**
--   **Google Cloud Run**
 
 ### GitHub Privacy: Public vs. Private
 -   **Private Repo**: Use if you want to keep your specific implementation or custom logic hidden.
@@ -77,4 +60,4 @@ To use this tracker in your torrents or P2P clients, use the following URLs.
 ---
 
 ## 📜 License
-Internal use for KaspStore.
+Internal use for KaspStore(kaspa blockdag network)
