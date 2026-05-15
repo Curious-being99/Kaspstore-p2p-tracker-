@@ -37,7 +37,7 @@
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "express-rate-limit": "^8.5.1",
-    "geoip-lite": "^1.4.10",
+    "geoip-lite": "^2.0.2",
     "helmet": "^8.1.0",
     "ipaddr.js": "^2.4.0",
     "libp2p": "^3.3.0",
@@ -53,7 +53,8 @@
     "ws": "^8.20.1"
   },
   "overrides": {
-    "ip": "1.1.9"
+    "ip": "1.1.9",
+    "ip-address": "10.2.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
