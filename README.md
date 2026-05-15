@@ -1,63 +1,84 @@
-# 🚀 KaspStore P2P Tracker
+# 🚀 Ultra-Secure P2P Signaling & Tracker Node
 
-A high-performance, multi-protocol BitTorrent and WebTorrent tracker designed for the **KaspStore Decentralized Ecosystem**. This server facilitates peer-to-peer data exchange across Web, Mobile, and Desktop clients.
+A professional-grade BitTorrent/libp2p hybrid tracker designed for high-throughput signaling and decentralized peer discovery. This node acts as a secure "Orchestrator" for distributed swarms, implementing advanced cryptographic handshakes, multi-layered ICE management, and a Kaspa-inspired verifiable DAG for network events.
 
-## ✨ Features
+## 📊 System Architecture
 
--   **Dual Protocol Support**: Handles both standard BitTorrent (HTTP) and WebTorrent (WebSockets).
--   **Hardened Security**: Integrated rate-limiting, API Key authentication, and a **Virtual Patch for CVE-2024-29415**. We use `ipaddr.js` to block sophisticated SSRF attacks (like obfuscated decimal/octal IPs) that standard `ip` packages fail to catch.
--   **Trillion-Scale Ready**: Optimized for high-throughput P2P signaling with automatic memory monitoring and graceful shutdown to prevent point-of-failure.
+The following diagram illustrates the high-level signaling flow and peer discovery mechanism:
 
----
+```mermaid
+graph TD
+    subgraph Client_Layer [Peer Node]
+        P[Peer Instance]
+        WT[WebTorrent Client]
+    end
 
-## 🛠️ Installation & Setup
+    subgraph Security_Gate [Security & Verification]
+        HG[Helmet / CSP]
+        SG[SSRF Guard / IP Validator]
+        Auth[API Key Validator]
+        NAC[NaCl Handshake]
+    end
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/kaspstore-tracker.git
-cd kaspstore-tracker
+    subgraph Service_Core [Tracker Engine]
+        TS[Tracker Signaling]
+        ICE[ICE Orchestrator]
+        DAG[Kaspa-Style DAG]
+    end
+
+    subgraph Mesh_Network [Decentralized Mesh]
+        DHT[Mainline DHT]
+        LP2P[libp2p Mesh / GossipSub]
+    end
+
+    P -->|1. Cryptographic Handshake| NAC
+    NAC -->|2. Verify & Trust Score| Auth
+    Auth -->|3. Get Signaling Config| ICE
+    P -->|4. Announce| TS
+    TS -->|5. IP Validation| SG
+    TS -->|6. Record Event| DAG
+    P <-->|7. Mesh Discovery| LP2P
+    LP2P <--> DHT
+    ICE -->|ICE JSON| P
 ```
 
-### 2. Install Dependencies
-```bash
-npm install
-```
+---
 
+## 🛡️ Security & Hardening
 
-### 4. Configure Environment Variables
-Create a `.env` file or set these in your deployment dashboard:
-```env
-PORT=3000
-TRACKER_API_KEY=your_generated_key_here
-NODE_ENV=production
-```
+This tracker is built with a "Zero-Trust" architectural philosophy:
 
+- **Iroh-Style Handshake**: Peer identities are tied to public keys. Every connection is cryptographically verified using `tweetnacl` to prevent ID spoofing.
+- **SSRF Guard**: Strict validation of peer IPs against a global routable registry. Private IP blocks and local loopbacks are automatically rejected to prevent server-side request forgery.
+- **Hardened Headers**: Full `Helmet` integration with strict Content Security Policy (CSP), XSS protection, and frame-guarding.
+- **API Filtering**: All tracker announcements and ICE requests require a valid backend API key, preventing unauthorized swarm scraping.
+- **Privacy Masking**: The specialized "ICE JSON Buffer" provides a read-only, masked view of network parameters, hiding sensitive credentials even during inspection.
 
-### GitHub Privacy: Public vs. Private
--   **Private Repo**: Use if you want to keep your specific implementation or custom logic hidden.
--   **Public Repo**: Safe to use even with security, **provided you never commit your `.env` file**. The logic is public, but the "lock" (API Key) is only in your deployment settings.
+## 🌐 Decentralized Networking
+
+The system operates across multiple discovery layers simultaneously:
+
+1.  **Multi-Layered ICE**: Orchestrates STUN servers for direct P2P and TURN relays (Public & Private) for peers behind restrictive NATs.
+2.  **libp2p Mesh**: Integrated GossipSub mesh for real-time propagation of "global-search" queries across the network.
+3.  **BitTorrent Mainline DHT**: Cross-compatibility with the global DHT network for massive peer availability.
+4.  **Kaspa-Inspired DAG**: All signaling events are recorded into a Directed Acyclic Graph (DAG) with GHOSTDAG-inspired blue-score headers, providing a verifiable log of network activity.
+
+## 🚀 Performance Features
+
+- **Prometheus Metrics**: Full instrumentation for monitoring swarm health, peer counts, and response latencies.
+- **NAT Priority Routing**: Automatically shifts TURN servers to the top of the stack for peers detected behind restrictive firewalls.
+- **Memory Guard**: Self-healing loops monitor RSS memory and shed inactive swarms under high load to ensure 99.9% uptime.
+- **Topological Sorting**: Address sorters prioritize IPv6 peers for modern connectivity while maintaining fallback for legacy stacks.
+
+## 🛠️ Tech Stack
+
+- **Server**: Node.js / Express
+- **Signaling**: bittorrent-tracker (WS/HTTP/UDP)
+- **P2P Core**: libp2p, bittorrent-dht, nacl (ED25519)
+- **Database**: SQLite (WAL Mode) for persistent DAG storage
+- **UI**: Tailwind CSS, Lucide Icons, WebTorrent (Client-side)
 
 ---
 
-## 📡 Usage (Announce URLs)
-
-To use this tracker in your torrents or P2P clients, use the following URLs.
-
-### For WebTorrent (Browser-based):
-`wss://your-domain.com/announce?api_key=your_key`
-
-### For Standard BitTorrent (Desktop/Mobile):
-`https://your-domain.com/announce?api_key=your_key`
-
----
-
-## 📊 Endpoints
-
--   `/health`: Check if the server is alive.
--   `/stats`: View current swarms, seeds, and leeches.
--   `/announce`: The P2P heartbeat endpoint.
-
----
-
-## 📜 License
-Internal use for KaspStore(kaspa blockdag network)
+> **Protected by KaspStore Security Standards**  
+> _Terminal System Deviations are automatically logged and mitigated._

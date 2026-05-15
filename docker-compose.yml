@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  kaspstore-tracker:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - TRACKER_API_KEY=${TRACKER_API_KEY:-kaspstore_super_secret_key}
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
