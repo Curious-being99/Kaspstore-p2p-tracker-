@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Kaspstore-p2p-tracker
-=======
 # 🚀 Ultra-Secure P2P Signaling & Tracker Node
 
 A professional-grade BitTorrent/libp2p hybrid tracker designed for high-throughput signaling and decentralized peer discovery. This node acts as a secure "Orchestrator" for distributed swarms, implementing advanced cryptographic handshakes, multi-layered ICE management, and a Kaspa-inspired verifiable DAG for network events.
@@ -66,7 +63,16 @@ The system operates across multiple discovery layers simultaneously:
 3.  **BitTorrent Mainline DHT**: Cross-compatibility with the global DHT network for massive peer availability.
 4.  **Kaspa-Inspired DAG**: All signaling events are recorded into a Directed Acyclic Graph (DAG) with GHOSTDAG-inspired blue-score headers, providing a verifiable log of network activity.
 
-## 🚀 Performance Features
+## ⚡ Quick Start & Clone
+
+Once you export this project to your GitHub, anyone can clone and run it with a single command:
+
+```bash
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
+npm install
+npm run dev
+```
 
 - **Prometheus Metrics**: Full instrumentation for monitoring swarm health, peer counts, and response latencies.
 - **NAT Priority Routing**: Automatically shifts TURN servers to the top of the stack for peers detected behind restrictive firewalls.
@@ -85,4 +91,3 @@ The system operates across multiple discovery layers simultaneously:
 
 > **Protected by KaspStore Security Standards**  
 > _Terminal System Deviations are automatically logged and mitigated._
->>>>>>> origin/main

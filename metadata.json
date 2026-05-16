@@ -2,5 +2,7 @@
   "name": "P2P Network Tracker",
   "description": "High-performance BitTorrent Tracker featuring a Kaspa-inspired DAG for verifiable peer discovery and a libp2p mesh for decentralized routing.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
