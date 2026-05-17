@@ -29,7 +29,7 @@ jobs:
           chmod 600 ~/.radicle/keys/radicle
           
           # Generate public key
-          ssh-keygen -y -f ~/.radicle/keys/radicle > ~/.radicle/keys/radicle.pub
+          ssh-keygen -y -P "$RAD_PASSPHRASE" -f ~/.radicle/keys/radicle > ~/.radicle/keys/radicle.pub
 
           # Configure Radicle Profile manually to avoid 'keystore initialized' error from rad auth
           cat << 'EOF' > ~/.radicle/config.json
@@ -37,7 +37,6 @@ jobs:
             "publicExplorer": "https://app.radicle.xyz/nodes/$host/$rid",
             "preferredSeeds": [
               "z3gqcJUoA1n9MqE8bZbgHGZNsqhxj",
-              "z3gqcJUoA1n9MqE8bZbgHGZNsq...",
               "seed.radicle.xyz",
               "seed.radicle.garden"
             ],
@@ -61,7 +60,7 @@ jobs:
           if [ -n "$RAD_PROJECT_ID" ]; then
             echo "Setting up radicle remote for project $RAD_PROJECT_ID"
             git remote add rad "rad://$RAD_PROJECT_ID" || true
-            git push rad HEAD:refs/heads/main
+            git push rad HEAD:refs/heads/${GITHUB_REF_NAME}
           else
             echo "Warning: RAD_PROJECT_ID is missing. Defaulting to original checkout state."
           fi
