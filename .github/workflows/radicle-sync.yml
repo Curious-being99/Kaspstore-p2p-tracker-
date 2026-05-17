@@ -29,6 +29,6 @@ jobs:
           
           # Start Node and Sync
           eval $(ssh-agent -s)
-          echo "$RAD_PASS" | rad auth --stdin
+          echo "$RAD_PASS" | rad auth --alias Curiousbeing9 --stdin
           rad node start
           rad sync --announce
