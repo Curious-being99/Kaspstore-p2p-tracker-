@@ -14,59 +14,22 @@ jobs:
 
       - name: Install Radicle
         run: |
-          curl -sSfL https://radicle.xyz/install | sh
+          curl -sSf https://radicle.xyz/install | sh
           echo "$HOME/.radicle/bin" >> $GITHUB_PATH
 
       - name: Authorize & Sync
         env:
           RAD_KEY: ${{ secrets.RAD_PRIVATE_KEY }}
-          RAD_PASSPHRASE: ${{ secrets.RAD_PASSPHRASE }}
-          RAD_PROJECT_ID: ${{ secrets.RAD_PROJECT_ID || vars.RAD_PROJECT_ID }}
+          RAD_PASS: ${{ secrets.RAD_PASSPHRASE }}
         run: |
-          # Setup keys
           mkdir -p ~/.radicle/keys
           echo "$RAD_KEY" > ~/.radicle/keys/radicle
           chmod 600 ~/.radicle/keys/radicle
           
-          # Generate public key
-          if ! ssh-keygen -y -P "$RAD_PASSPHRASE" -f ~/.radicle/keys/radicle > ~/.radicle/keys/radicle.pub 2>/dev/null; then
-             echo "::error::Failed to decrypt the Radicle private key. Please verify that your RAD_PASSPHRASE GitHub Secret matches your RAD_PRIVATE_KEY."
-             exit 1
-          fi
-
-          # Configure Radicle Profile manually to avoid 'keystore initialized' error from rad auth
-          cat << 'EOF' > ~/.radicle/config.json
-          {
-            "publicExplorer": "https://app.radicle.xyz/nodes/$host/$rid",
-            "preferredSeeds": [
-              "z3gqcJUoA1n9MqE8bZbgHGZNsqhxj",
-              "seed.radicle.xyz",
-              "seed.radicle.garden"
-            ],
-            "node": {
-              "alias": "Curiousbeing9",
-              "listen": [],
-              "peers": {
-                "type": "dynamic"
-              },
-              "network": "main",
-              "relay": true
-            }
-          }
-          EOF
-          
-          # Start Node and Sync
           eval $(ssh-agent -s)
+          # The --stdin flag allows the Robot to use your secret passphrase
+          echo "$RAD_PASS" | rad auth --stdin --alias Curiousbeing9
+          
           rad node start
-          
-          # Configure git repo to track radicle project id and push
-          if [ -n "$RAD_PROJECT_ID" ]; then
-            echo "Setting up radicle remote for project $RAD_PROJECT_ID"
-            git remote add rad "rad://$RAD_PROJECT_ID" || true
-            git push rad HEAD:refs/heads/${GITHUB_REF_NAME}
-          else
-            echo "Warning: RAD_PROJECT_ID is missing. Defaulting to original checkout state."
-          fi
-          
-          # Sync rad state with seed nodes
-          rad sync --announce
+          # This forces the node to sync your specific KaspStore tracker
+          rad sync rad:z2sjHzPsk9wmmpPm1F93tYT38yeYK --announce
