@@ -1,46 +1,17 @@
-name: Radicle Cloud Sync
-on:
-  push:
-    branches: [ main, master ]
+- name: Restore Machine Identity
+  env:
+    RAD_HOME_TAR: ${{ secrets.RAD_HOME_TAR }}
+  run: |
+    # Strip any whitespace GitHub might inject, then decode
+    echo "$RAD_HOME_TAR" | tr -d ' \n\r' | base64 -d | tar -xz -C "$HOME"
+    # Tell subsequent steps where the identity lives
+    echo "RAD_HOME=$HOME/.radicle_ci" >> $GITHUB_ENV
 
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install Radicle
-        run: |
-          curl -LsSf https://radicle.xyz/install | sh
-          echo "$HOME/.radicle/bin" >> $GITHUB_PATH
-
-      - name: Restore Machine Identity
-        env:
-          RAD_HOME_TAR: ${{ secrets.RAD_HOME_TAR }}
-        run: |
-          # Decode and unpack the CI machine identity into ~/.radicle
-          mkdir -p "$HOME/.radicle"
-          echo "$RAD_HOME_TAR" | base64 -d | tar -xz -C "$HOME/.radicle_ci"
-          # Symlink so rad uses it as default home
-          ln -sfn "$HOME/.radicle_ci" "$HOME/.radicle"
-
-      - name: Push to Radicle
-        env:
-          RAD_PASSPHRASE: ${{ secrets.RAD_PASSPHRASE }}
-        run: |
-          # Start node in background, wait for socket
-          rad node start &
-          sleep 5
-
-          # Init repo link if first run (idempotent)
-          rad init \
-            --name "KRYPHOS" \
-            --default-branch "${GITHUB_REF_NAME}" \
-            --no-confirm 2>/dev/null || true
-
-          # Push all branches + announce to network
-          rad push --all --seed seed.radicle.garden
-          rad sync rad:z2sjHzPsk9wmmpPm1F93tYT38yeYK --announce
+- name: Push to Radicle
+  env:
+    RAD_PASSPHRASE: ${{ secrets.RAD_PASSPHRASE }}
+  run: |
+    rad node start &
+    sleep 5
+    rad push --all --seed seed.radicle.garden
+    rad sync rad:z2sjHzPsk9wmmpPm1F93tYT38yeYK --announce
