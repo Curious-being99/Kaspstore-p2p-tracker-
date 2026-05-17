@@ -14,7 +14,6 @@ jobs:
 
       - name: Install Radicle
         run: |
-          # The -L flag forces curl to follow redirects, fixing the HTML error
           curl -LsSf https://radicle.xyz/install | sh
           echo "$HOME/.radicle/bin" >> $GITHUB_PATH
 
@@ -23,12 +22,18 @@ jobs:
           RAD_KEY: ${{ secrets.RAD_PRIVATE_KEY }}
           RAD_PASS: ${{ secrets.RAD_PASSPHRASE }}
         run: |
+          # 1. Setup the keys
           mkdir -p ~/.radicle/keys
           echo "$RAD_KEY" > ~/.radicle/keys/radicle
           chmod 600 ~/.radicle/keys/radicle
           
-          eval $(ssh-agent -s)
-          echo "$RAD_PASS" | rad auth --stdin --alias Curiousbeing9
+          # 2. Extract the Public Key (Radicle needs both files to unlock properly)
+          ssh-keygen -y -f ~/.radicle/keys/radicle > ~/.radicle/keys/radicle.pub
           
+          # 3. Start SSH Agent and Unlock the Identity (Removed --alias)
+          eval $(ssh-agent -s)
+          echo "$RAD_PASS" | rad auth --stdin
+          
+          # 4. Start the node and Sync your Kaspstore tracker
           rad node start
           rad sync rad:z2sjHzPsk9wmmpPm1F93tYT38yeYK --announce
