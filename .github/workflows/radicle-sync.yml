@@ -29,7 +29,10 @@ jobs:
           chmod 600 ~/.radicle/keys/radicle
           
           # Generate public key
-          ssh-keygen -y -P "$RAD_PASSPHRASE" -f ~/.radicle/keys/radicle > ~/.radicle/keys/radicle.pub
+          if ! ssh-keygen -y -P "$RAD_PASSPHRASE" -f ~/.radicle/keys/radicle > ~/.radicle/keys/radicle.pub 2>/dev/null; then
+             echo "::error::Failed to decrypt the Radicle private key. Please verify that your RAD_PASSPHRASE GitHub Secret matches your RAD_PRIVATE_KEY."
+             exit 1
+          fi
 
           # Configure Radicle Profile manually to avoid 'keystore initialized' error from rad auth
           cat << 'EOF' > ~/.radicle/config.json
