@@ -20,15 +20,51 @@ jobs:
       - name: Authorize & Sync
         env:
           RAD_KEY: ${{ secrets.RAD_PRIVATE_KEY }}
-          RAD_PASS: ${{ secrets.RAD_PASSPHRASE }}
+          RAD_PASSPHRASE: ${{ secrets.RAD_PASSPHRASE }}
+          RAD_PROJECT_ID: ${{ secrets.RAD_PROJECT_ID || vars.RAD_PROJECT_ID }}
         run: |
           # Setup keys
           mkdir -p ~/.radicle/keys
           echo "$RAD_KEY" > ~/.radicle/keys/radicle
           chmod 600 ~/.radicle/keys/radicle
           
+          # Generate public key
+          ssh-keygen -y -f ~/.radicle/keys/radicle > ~/.radicle/keys/radicle.pub
+
+          # Configure Radicle Profile manually to avoid 'keystore initialized' error from rad auth
+          cat << 'EOF' > ~/.radicle/config.json
+          {
+            "publicExplorer": "https://app.radicle.xyz/nodes/$host/$rid",
+            "preferredSeeds": [
+              "z3gqcJUoA1n9MqE8bZbgHGZNsqhxj",
+              "z3gqcJUoA1n9MqE8bZbgHGZNsq...",
+              "seed.radicle.xyz",
+              "seed.radicle.garden"
+            ],
+            "node": {
+              "alias": "Curiousbeing9",
+              "listen": [],
+              "peers": {
+                "type": "dynamic"
+              },
+              "network": "main",
+              "relay": true
+            }
+          }
+          EOF
+          
           # Start Node and Sync
           eval $(ssh-agent -s)
-          echo "$RAD_PASS" | rad auth --alias Curiousbeing9 --stdin
           rad node start
+          
+          # Configure git repo to track radicle project id and push
+          if [ -n "$RAD_PROJECT_ID" ]; then
+            echo "Setting up radicle remote for project $RAD_PROJECT_ID"
+            git remote add rad "rad://$RAD_PROJECT_ID" || true
+            git push rad HEAD:refs/heads/main
+          else
+            echo "Warning: RAD_PROJECT_ID is missing. Defaulting to original checkout state."
+          fi
+          
+          # Sync rad state with seed nodes
           rad sync --announce
