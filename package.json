@@ -54,7 +54,6 @@
     "ws": "^8.20.1"
   },
   "overrides": {
-    "ip": "1.1.9",
     "ip-address": "10.2.0"
   },
   "devDependencies": {

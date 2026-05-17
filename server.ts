@@ -39,6 +39,21 @@ const PORT = 3000;
 global.myNatStatus = 'unknown'; // Initialize
 const app = express();
 
+const validateApiKey = (req, res, next) => {
+    const reqKey = process.env.TRACKER_API_KEY;
+    const clientKey = req.headers['x-api-key'] || req.query.api_key || req.query.token;
+
+    if (!reqKey) {
+        console.error('CRITICAL: TRACKER_API_KEY is not set in environment variables.');
+        return res.status(503).json({ error: 'Security misconfiguration: Tracker API key missing from server environment' });
+    }
+
+    if (clientKey !== reqKey) {
+        return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });
+    }
+    next();
+};
+
 // Vite middleware setup
 async function setupVite() {
   const distPath = path.join(process.cwd(), 'dist');
@@ -164,21 +179,6 @@ const DEFAULT_ICE_SERVERS = [
     credential: "openrelayprojectsecret"
   }
 ];
-
-const validateApiKey = (req, res, next) => {
-    const reqKey = process.env.TRACKER_API_KEY;
-    const clientKey = req.headers['x-api-key'] || req.query.api_key || req.query.token;
-
-    if (!reqKey) {
-        console.error('CRITICAL: TRACKER_API_KEY is not set in environment variables.');
-        return res.status(503).json({ error: 'Security misconfiguration: Tracker API key missing from server environment' });
-    }
-
-    if (clientKey !== reqKey) {
-        return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });
-    }
-    next();
-};
 
 // --- FEATURE 1: MULTI-LAYERED ICE ORCHESTRATION ---
 // Orchestrates Layer 1 (STUN), Layer 2 (Public Relays), and Layer 3 (Private Enterprise Relays)
