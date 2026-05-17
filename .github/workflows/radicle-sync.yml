@@ -12,14 +12,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Radicle Binary
+      - name: Install Radicle
         run: |
-          # Download the official binary directly
-          wget https://files.radicle.xyz/latest/radicle-x86_64-unknown-linux-musl.tar.xz
-          tar -xvf radicle-x86_64-unknown-linux-musl.tar.xz
-          # Move it to a folder in the PATH
-          sudo mv radicle-x86_64-unknown-linux-musl/bin/* /usr/local/bin/
-          echo "Radicle version: $(rad --version)"
+          # The -L flag forces curl to follow redirects, fixing the HTML error
+          curl -LsSf https://radicle.xyz/install | sh
+          echo "$HOME/.radicle/bin" >> $GITHUB_PATH
 
       - name: Authorize & Sync
         env:
@@ -31,9 +28,7 @@ jobs:
           chmod 600 ~/.radicle/keys/radicle
           
           eval $(ssh-agent -s)
-          # Using --stdin to log in as Curiousbeing9
           echo "$RAD_PASS" | rad auth --stdin --alias Curiousbeing9
           
           rad node start
-          # Force sync the Kaspstore tracker
           rad sync rad:z2sjHzPsk9wmmpPm1F93tYT38yeYK --announce
